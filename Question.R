@@ -26,21 +26,15 @@ if (!file.exists("./data/gdp.csv")) {
                 "./data/gdp.csv")
 }
 
-# Data in "factor" class.
+# Do not read strings as factors!
 gdp_factor <- read.csv("./data/gdp.csv", header = FALSE, skip = 5,
-                       na.strings = "") %>% 
+                       na.strings = "", 
+                       stringsAsFactors = FALSE) %>%  # Not factors
   tbl_df %>%
   select(country = V1, ranking = V2, economy = V4, gdp = V5) %>%
+  mutate(ranking = as.numeric(ranking),
+         gdp = gsub(",", "", gdp), # Drop commas in numeric strings!
+         gdp = as.numeric(gdp)) %>%
   na.omit %>% print
 
-# Data in "numeric" class.
-gdp_numeric <- read.csv("./data/gdp.csv", header = FALSE, skip = 5,
-                        na.strings = "") %>% 
-  tbl_df %>%
-  select(country = V1, ranking = V2, economy = V4, gdp = V5) %>%
-  mutate(ranking = as.numeric(ranking), gdp = as.numeric(gdp)) %>%
-  na.omit %>% print
-
-# In the "numeric" version I got a Chinesse GDP of 39 and a ranking of 103, but
-# in the factor version it's 8.2M and 2, respectively. Similar errors occurs in
-# these two vectors.
+# If you read numeric 'strings' as factors, you'll get strange results!
